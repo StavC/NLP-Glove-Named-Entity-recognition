@@ -11,7 +11,7 @@ from sklearn.metrics import *
 import pickle
 
 
-def TaggedDataToSen(text):  # Reading all words in the file, adding them to lists per sentence with some padding
+def TaggedDataToSen(text,name):  # Reading all words in the file, adding them to lists per sentence with some padding
     with open(text, 'r', encoding='utf-8') as f:
         sentences = f.readlines()
     sentences = [sen.split() for sen in sentences if sen]
@@ -46,9 +46,45 @@ def TaggedDataToSen(text):  # Reading all words in the file, adding them to list
             current_labels.append(False)
         else:
             current_labels.append(True)
-    print(f' there are {countWords} words and labels in dataset')
+    print(f' there are {countWords} words and labels in {name} dataset')
 
     return all_sen, all_sen_labels
+
+
+def TestDataToSen(text):  # Reading all words in the file, adding them to lists per sentence with some padding
+    with open(text, 'r', encoding='utf-8') as f:
+        sentences = f.readlines()
+    sentences = [sen.split() for sen in sentences if sen]
+
+    countWords = 0
+
+    current_sen = []
+    current_sen.append('unkunkunk')
+    current_sen.append('unkunkunk')
+    current_sen.append('unkunkunk')
+    current_labels = []
+    all_sen_labels = []
+    all_sen = []
+    for word in sentences:
+        if word == []:  # if we reached the end of the sen
+            current_sen.append('unkunkunk')
+            current_sen.append('unkunkunk')
+            current_sen.append('unkunkunk')
+            all_sen.append(current_sen)  # append the sen to the list of all sen
+            all_sen_labels.append(current_labels)
+            current_sen = []  # start a new sen
+            current_sen.append('unkunkunk')
+            current_sen.append('unkunkunk')
+            current_sen.append('unkunkunk')
+            current_labels = []
+            continue
+
+        current_sen.append(word[0])
+        countWords += 1
+
+    print(f' there are {countWords} words in Test dataset')
+
+    return all_sen
 
 
 def WordToGloveRep(sens, labels, glove, name):
@@ -102,6 +138,13 @@ def WordToGloveRep(sens, labels, glove, name):
 def TrainSVM(train_x,train_y):
     svm_model = svm.SVC()
     svm_model.fit(train_x, train_y)
+    with open('NewSVMModel.pkl', 'wb') as f:
+        pickle.dump(svm_model, f)
+    return svm_model
+
+def LoadSVMModel():
+    with open('SVMModel.pkl', 'rb') as f:
+        svm_model = pickle.load(f)
     return svm_model
 
 def ValPredictSVM(val_x,val_y,svm_model):
@@ -116,18 +159,29 @@ def TrainPredictSVM(train_x,train_y,svm_model):
     print(f'Accuracy score for the train {accuracy_score(train_y, train_y_pred_svm)}')
     print(classification_report(train_y, train_y_pred_svm))
 
+def TestPredictSVM(test_x,svm_model):
+    train_y_pred_svm = svm_model.predict(test_x)
+
+
 
 def main():
     # Getting started
-    GLOVE_PATH = 'glove-twitter-50'
+    GLOVE_PATH = 'glove-twitter-200'
     glove = downloader.load(GLOVE_PATH)
     train_path = 'train.tagged'
     dev_path = 'dev.tagged'
-    train_full_sen, train_full_labels = TaggedDataToSen('train.tagged')
-    val_full_sen, val_full_labels = TaggedDataToSen('dev.tagged')
+    test_path='test.untagged'
+    train_full_sen, train_full_labels = TaggedDataToSen('train.tagged',name='Train')
+    val_full_sen, val_full_labels = TaggedDataToSen('dev.tagged',name='Validation')
     train_x, train_y = WordToGloveRep(train_full_sen, train_full_labels, glove, name='Train')
     val_x, val_y = WordToGloveRep(val_full_sen, val_full_labels, glove, name='Validation')
 
+    #training part
+    TrainSVM(train_x, train_y)
+    # loading the SVM Model
+    svm_model=LoadSVMModel()
+    TrainPredictSVM(train_x, train_y, svm_model)
+    ValPredictSVM(val_x, val_y, svm_model)
 
 if __name__ == "__main__":
     main()
