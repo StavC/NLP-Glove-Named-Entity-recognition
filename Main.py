@@ -10,6 +10,7 @@ from sklearn import svm
 from sklearn.metrics import *
 import pickle
 from sklearn.utils import shuffle
+from ANN import *
 
 
 def TaggedDataToSen(text,name):  # Reading all words in the file, adding them to lists per sentence with some padding
@@ -280,17 +281,24 @@ def main():
 
 
 
+
     #training part
     train_x,train_y=BalanceTrainData(train_x,train_y)
     #svm_model=TrainSVM(train_x, train_y)
 
+
+    """ 
     svm_model=LoadSVMModel('SVMModel.pkl')   # loading the SVM Model
 
     TrainPredictSVM(train_x, train_y, svm_model)
     ValPredictSVM(val_x, val_y, svm_model)
     sentences, pred_y = TestPredictSVM(test_path, svm_model, glove)
     WriteTestTagged(sentences, pred_y)
+    """
 
 
+    #trainANN(train_x,train_y, val_x,val_y)
+    ANN_model=LoadANNModel('saved_weights.pt') # if you want to train the model you can load it with the name NEW_saved_weights.pt
+    PredictF1onVal(ANN_model,val_x,val_y)
 if __name__ == "__main__":
     main()
