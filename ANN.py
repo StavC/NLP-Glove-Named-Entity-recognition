@@ -4,7 +4,8 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from sklearn.metrics import *
-
+from HandleData import *
+from torch.autograd import Variable
 
 torch.manual_seed(0)
 
@@ -149,3 +150,29 @@ def PredictF1onVal(model,val_x,val_y):
     print(classification_report(val_y, y_pred_list))
     print('Confusion Matrix')
     print(confusion_matrix(val_y, y_pred_list))
+
+
+
+
+def TestPredictANN(test_path, ANN_model, glove):
+    ANN_model.eval()
+    test_full_sen = TestDataToSen(test_path)
+    test_full_vecs = TestWordsToGloveRep(test_full_sen, glove)
+    test_full_vecs = np.array(test_full_vecs)
+    pred_y = []
+    with open(test_path, 'r', encoding='utf-8') as f:
+        sentences = f.readlines()
+    sentences = [sen.split() for sen in sentences if sen]
+
+    for sen in test_full_vecs:
+        for word in sen:
+            row = Variable(torch.Tensor([word]).float())
+            pred_ANN = ANN_model(row.reshape(1, -1))
+            y_test_pred = torch.sigmoid(pred_ANN)
+            y_pred_tag = torch.round(y_test_pred)
+            if y_pred_tag == True:
+                pred_y.append('T')
+            else:
+                pred_y.append('O')
+        pred_y.append('')
+    return sentences, pred_y
