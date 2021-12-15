@@ -31,21 +31,22 @@ def main():
     train_x, train_y = WordToGloveRep(train_full_sen, train_full_labels, glove, name='Train')
     val_x, val_y = WordToGloveRep(val_full_sen, val_full_labels, glove, name='Validation')
     train_x,train_y=BalanceTrainData(train_x,train_y)
+    print('Finished loading train, val and balance train')
 
     #########SVM Part########
-    #svm_model=TrainSVM(train_x, train_y)
+    svm_model=TrainSVM(train_x, train_y)
     svm_model=LoadSVMModel('NewSVMModel.pkl')   # loading the SVM Model
-    #TrainPredictSVM(train_x, train_y, svm_model)
-    #ValPredictSVM(val_x, val_y, svm_model)
+    TrainPredictSVM(train_x, train_y, svm_model)
+    ValPredictSVM(val_x, val_y, svm_model)
     sentences, pred_y = TestPredictSVM(test_path, svm_model, glove)
     WriteTestTaggedSVM(sentences, pred_y)
 
 
     #########ANN Part########
     trainANN(train_x,train_y, val_x,val_y)
-    ANN_model=LoadANNModel('saved_weights.pt') # if you want to train the model you can load it with the name NEW_saved_weights.pt
+    ANN_model=LoadANNModel('NEW_saved_weights.pt') # if you want to train the model you can load it with the name NEW_saved_weights.pt
     PredictF1onVal(ANN_model,val_x,val_y)
-    sentences, pred_y = TestPredictANN(test_path, svm_model, glove)
+    sentences, pred_y = TestPredictANN(test_path, ANN_model, glove)
     WriteTestTaggedANN(sentences, pred_y)
 
 

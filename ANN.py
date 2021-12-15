@@ -9,6 +9,7 @@ from torch.autograd import Variable
 
 torch.manual_seed(0)
 
+
 class ANN(nn.Module):
     def __init__(self):
         super().__init__()
@@ -155,18 +156,23 @@ def PredictF1onVal(model,val_x,val_y):
 
 
 def TestPredictANN(test_path, ANN_model, glove):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    ANN_model.to(device)
     ANN_model.eval()
     test_full_sen = TestDataToSen(test_path)
     test_full_vecs = TestWordsToGloveRep(test_full_sen, glove)
-    test_full_vecs = np.array(test_full_vecs)
+    test_full_vecs = np.array(test_full_vecs,dtype=object)
     pred_y = []
+
+
     with open(test_path, 'r', encoding='utf-8') as f:
         sentences = f.readlines()
     sentences = [sen.split() for sen in sentences if sen]
 
     for sen in test_full_vecs:
         for word in sen:
-            row = Variable(torch.Tensor([word]).float())
+            word=np.array(word)
+            row = Variable((torch.Tensor(word).float()).to(device))
             pred_ANN = ANN_model(row.reshape(1, -1))
             y_test_pred = torch.sigmoid(pred_ANN)
             y_pred_tag = torch.round(y_test_pred)
