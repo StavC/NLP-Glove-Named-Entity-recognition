@@ -6,7 +6,7 @@ import pickle
 from HandleData import TestDataToSen, TestWordsToGloveRep
 
 
-def TrainSVM(train_x,train_y):
+def TrainSVM(train_x,train_y): #training the SVM model and saving his weights
     svm_model = svm.SVC()
     svm_model.fit(train_x, train_y)
     with open('NewSVMModel.pkl', 'wb') as f:

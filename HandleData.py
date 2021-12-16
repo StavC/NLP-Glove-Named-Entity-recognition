@@ -1,14 +1,5 @@
-from gensim import downloader
 import numpy as np
-import pandas as pd
-import sklearn
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import f1_score
 import re
-from sklearn import svm
-from sklearn.metrics import *
-import pickle
 from sklearn.utils import shuffle
 
 
