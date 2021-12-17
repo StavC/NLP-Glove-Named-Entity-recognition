@@ -13,7 +13,7 @@ def TaggedDataToSen(text,name):  # Reading all words in the file, adding them to
     countWords = 0
 
     current_sen = []
-    current_sen.append('unkunkunk')
+    current_sen.append('unkunkunk')# padding token
     current_sen.append('unkunkunk')
     current_sen.append('unkunkunk')
     current_labels = []
@@ -53,7 +53,7 @@ def TestDataToSen(text):  # Reading all words in the file, adding them to lists 
     countWords = 0
 
     current_sen = []
-    current_sen.append('unkunkunk')
+    current_sen.append('unkunkunk') # padding token
     current_sen.append('unkunkunk')
     current_sen.append('unkunkunk')
     current_labels = []

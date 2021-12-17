@@ -40,7 +40,7 @@ def TestPredictSVM(test_path, svm_model, glove):
     sentences = [sen.split() for sen in sentences if sen]
 
     pred_y = []
-    for sen in test_full_vecs:
+    for sen in test_full_vecs:#predicting each word and appending it to a list of predictions with values T and O
         for word in sen:
             pred_svm = svm_model.predict(word.reshape(1, -1))
             if pred_svm == True:

@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
-import numpy as np
 from sklearn.metrics import *
 from HandleData import *
 from torch.autograd import Variable
@@ -10,7 +9,7 @@ from torch.autograd import Variable
 torch.manual_seed(0)
 
 
-class ANN(nn.Module):
+class ANN(nn.Module): # our simple ANN model
     def __init__(self):
         super().__init__()
         self.layer_1 = torch.nn.Linear(350, 2000)
@@ -28,13 +27,11 @@ class ANN(nn.Module):
         return x
 
 
-def binary_acc(y_pred, y_test):
+def binary_acc(y_pred, y_test): # small function estimate the binary acc
     y_pred_tag = torch.round(torch.sigmoid(y_pred))
-
     correct_results_sum = (y_pred_tag == y_test).sum().float()
     acc = correct_results_sum / y_test.shape[0]
     acc = torch.round(acc * 100)
-
     return acc
 
 def trainANN(train_x,train_y, val_x,val_y):
@@ -69,7 +66,7 @@ def trainANN(train_x,train_y, val_x,val_y):
     model.train()
 
     epochs = 5
-    min_valid_loss = np.inf
+    min_valid_loss = np.inf # used for model saving
 
     for e in range(1, epochs + 1):
 
@@ -93,7 +90,7 @@ def trainANN(train_x,train_y, val_x,val_y):
 
         valid_loss = 0.0
         valid_acc = 0.0
-        model.eval()
+        model.eval() # going to evaluate on valid set
         for data, labels in valid_loader:
             # Transfer Data to GPU if available
             if torch.cuda.is_available():
@@ -122,6 +119,7 @@ def LoadANNModel(path):
         model.load_state_dict(torch.load(path))
         print(model)
     return model
+
 def PredictF1onVal(model,val_x,val_y):
     val_y = np.array(val_y)
     val_x = np.array(val_x)
@@ -149,13 +147,11 @@ def PredictF1onVal(model,val_x,val_y):
 
     print(f' normal F1 from Sklearn {f1_score(val_y, y_pred_list)}')
     print(classification_report(val_y, y_pred_list))
-    print('Confusion Matrix')
-    print(confusion_matrix(val_y, y_pred_list))
 
 
 
 
-def TestPredictANN(test_path, ANN_model, glove):
+def TestPredictANN(test_path, ANN_model, glove): # making predicitons on the test set by using the ANN network
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     ANN_model.to(device)
     ANN_model.eval()
@@ -169,7 +165,7 @@ def TestPredictANN(test_path, ANN_model, glove):
         sentences = f.readlines()
     sentences = [sen.split() for sen in sentences if sen]
 
-    for sen in test_full_vecs:
+    for sen in test_full_vecs: # predicting each word and appending it to a list of predictions with values T and O
         for word in sen:
             word=np.array(word)
             row = Variable((torch.Tensor(word).float()).to(device))
